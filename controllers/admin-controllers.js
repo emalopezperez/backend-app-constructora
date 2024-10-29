@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const dbBooks = require("../models/bookModels");
-const dbReviews = require("../models/reviewModels");
+const dbPosts = require("../models/postModels");
+const uploadImages = require("../utils/uploadImage");
 
 const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
@@ -10,12 +10,27 @@ const loginAdmin = async (req, res) => {
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
     ) {
-      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+      const payload = { email };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
+      res.cookie("atoken", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
+      const dataAdmin = {
+        email: email,
+        name: "admin",
+      };
 
       return res.status(200).json({
         success: true,
         message: "User logged in successfully",
-        token: token,
+        data: dataAdmin,
       });
     } else {
       return res.status(401).json({
@@ -30,120 +45,91 @@ const loginAdmin = async (req, res) => {
   }
 };
 
-const createBook = async (req, res) => {
-  const { author, title } = req.body;
+const createPost = async (req, res) => {
+  const { title, description, category } = req.body;
+  const images = req.files;
+
   try {
-    if (!author || !title) {
-      return res.status(400).json({
-        message: "Author and title are required",
-      });
-    }
+    const imageUrls = await uploadImages(images);
 
     const data = {
-      author,
       title,
-      reviews: {},
+      description,
+      category,
+      images: imageUrls,
     };
 
-    const newBook = await dbBooks.create(data);
+    const newPost = await dbPosts.create(data);
 
-    await newBook.save();
+    await newPost.save();
 
     return res.status(201).json({
-      message: "Book created successfully",
-      book: newBook,
+      message: "Post created successfully",
+      post: newPost,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error creating book",
+      message: "Error creating post",
     });
   }
 };
 
-const deleteBook = async (req, res) => {
+const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const bookDelete = await dbBooks.findByIdAndDelete(id);
+    const postDelete = await dbPosts.findByIdAndDelete(id);
 
-    if (!bookDelete) {
+    if (!postDelete) {
       return res.status(404).json({
         message: "Book not found",
       });
     }
 
     return res.status(200).json({
-      message: "Book deleted successfully",
-      book: bookDelete,
+      message: "Post deleted successfully",
+      post: postDelete,
     });
   } catch (error) {
-    console.error("Error deleting book: ", error);
+    console.error("Error deleting post: ", error);
     return res.status(500).json({
-      message: "Error deleting book",
+      message: "Error deleting post",
     });
   }
 };
 
-const updateBook = async (req, res) => {
+const updatePost = async (req, res) => {
   try {
     const { author, title } = req.body;
     const { id } = req.params;
-    const bookUpdate = await dbBooks.findByIdAndUpdate(
+    const postUpdate = await dbPosts.findByIdAndUpdate(
       id,
       { author, title },
       { new: true, runValidators: true }
     );
 
-    if (!bookUpdate) {
+    if (!postUpdate) {
       return res.status(404).json({
-        message: "Book not found",
+        message: "Post not found",
       });
     }
 
     return res.status(200).json({
-      message: "Book updated successfully",
-      book: bookUpdate,
+      message: "Post updated successfully",
+      post: postUpdate,
     });
   } catch (error) {
-    console.error("Error updating book: ", error);
+    console.error("Error updating post: ", error);
     return res.status(500).json({
-      message: "Error updating book",
-    });
-  }
-};
-
-const deleteReview = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    console.log(id);
-
-    const review = await dbReviews.findOne({ book: id });
-
-    if (!review) {
-      return res.status(404).json({
-        message: "Review not found",
-      });
-    }
-
-    await dbReviews.deleteMany({ book: id });
-
-    return res.status(200).json({
-      message: "Review deleted successfully",
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Error deleting review",
+      message: "Error updating post",
     });
   }
 };
 
 module.exports = {
   loginAdmin,
-  createBook,
-  deleteBook,
-  updateBook,
-  deleteReview,
+  createPost,
+  deletePost,
+  updatePost,
 };

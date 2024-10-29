@@ -1,27 +1,30 @@
 const express = require("express");
 const connectDB = require("./config/moongodb.js");
-const jwt = require("jsonwebtoken");
-const session = require("express-session");
+const connectCloudinary = require("./config/cloudinary");
 const cors = require("cors");
-const bookRouter = require("./routes/book-routes.js");
-const reviewRouter = require("./routes/review-route.js");
-const userRouter = require("./routes/user-routes.js");
+const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/admin-routes");
+const postRoutes = require("./routes/post-routes");
 
 require("dotenv").config();
 
 const app = express();
+app.use(cookieParser());
 connectDB();
+connectCloudinary();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
-const PORT = 5000;
+const PORT = 8000;
 
-app.use("/public/book", bookRouter);
-app.use("/auth/user/books", reviewRouter);
-app.use("/auth/user", userRouter);
-app.use("/auth/admin", authRouter);
+app.use("/api/post", postRoutes);
+app.use("/api/auth/admin", authRouter);
 
 app.listen(PORT, () => console.log("Server is running"));

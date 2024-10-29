@@ -1,30 +1,22 @@
 const express = require("express");
 const adminController = require("../controllers/admin-controllers");
 const authAdmin = require("../middleware/authAdmin");
-const { userLoginSchema } = require("../schemas/userSchemas");
-const { bookSchema } = require("../schemas/bookSchemas");
+const upload = require("../middleware/multer");
+
 const { schemaValition } = require("../middleware/schemaValidator");
 
 const adminRouter = express.Router();
 
+adminRouter.post("/login", adminController.loginAdmin);
 adminRouter.post(
-  "/login",
-  schemaValition(userLoginSchema),
-  adminController.loginAdmin
-);
-adminRouter.post(
-  "/book/create",
-  schemaValition(bookSchema),
+  "/post/create",
   authAdmin,
-  adminController.createBook
-);
-adminRouter.delete("/book/delete/:id", authAdmin, adminController.deleteBook);
-adminRouter.delete(
-  "/book/delete-review/:id",
-  authAdmin,
-  adminController.deleteReview
+  upload.array("files"),
+  adminController.createPost
 );
 
-adminRouter.put("/book/update/:id", authAdmin, adminController.updateBook);
+adminRouter.delete("/post/delete/:id", authAdmin, adminController.deletePost);
+
+adminRouter.put("/post/update/:id", authAdmin, adminController.updatePost);
 
 module.exports = adminRouter;
