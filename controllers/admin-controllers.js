@@ -20,7 +20,7 @@ const loginAdmin = async (req, res) => {
         httpOnly: true,
         secure: false,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+        sameSite: "lax",
       });
 
       const dataAdmin = {
