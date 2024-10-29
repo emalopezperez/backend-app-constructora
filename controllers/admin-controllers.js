@@ -18,9 +18,9 @@ const loginAdmin = async (req, res) => {
 
       res.cookie("atoken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: false,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: "None",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
       });
 
       const dataAdmin = {
