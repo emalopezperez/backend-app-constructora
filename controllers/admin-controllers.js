@@ -2,8 +2,11 @@ const jwt = require("jsonwebtoken");
 const dbPosts = require("../models/postModels");
 const uploadImages = require("../utils/uploadImage");
 
-const loginAdmin = async (req, res) => {
+const jwt = require("jsonwebtoken");
+
+const loginAdmin = (req, res) => {
   const { email, password } = req.body;
+  const isProduction = process.env.NODE_ENV === "production";
 
   try {
     if (
@@ -18,9 +21,9 @@ const loginAdmin = async (req, res) => {
 
       res.cookie("atoken", token, {
         httpOnly: true,
-        secure: false,
+        secure: isProduction,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: "lax",
+        sameSite: isProduction ? "None" : "Lax",
       });
 
       const dataAdmin = {
@@ -35,13 +38,14 @@ const loginAdmin = async (req, res) => {
       });
     } else {
       return res.status(401).json({
+        success: false,
         message: "Invalid credentials",
       });
     }
   } catch (error) {
-    console.error("Login error: ", error);
     return res.status(500).json({
-      message: "Error logging in user",
+      success: false,
+      message: "Server error",
     });
   }
 };
