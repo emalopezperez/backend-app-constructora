@@ -15,12 +15,17 @@ connectCloudinary();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
 app.use(
   cors({
     origin: "*",
     credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
 
 const PORT = 3001;
 
