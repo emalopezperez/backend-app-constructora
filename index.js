@@ -17,7 +17,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin:
+      "https://backend-app-constructora-lasvou9em-emalopezperezs-projects.vercel.app/",
     credentials: true,
   })
 );
