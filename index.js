@@ -20,16 +20,30 @@ app.use(
   cors({
     origin: "*",
     credentials: true,
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "OPTIONS", "PUT", "HEAD"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Origin",
+      "X-Requested-With",
+      "Accept",
+    ],
   })
 );
 
-app.options("*", cors());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  next();
+});
 
 const PORT = 3001;
 
 app.use("/api/post", postRoutes);
 app.use("/api/auth/admin", authRouter);
 
-app.listen(PORT, () => console.log("Server is running"));
+app.listen(PORT, () => console.log("Server is running on port", PORT));
