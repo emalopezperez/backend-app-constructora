@@ -7,7 +7,6 @@ const authRouter = require("./routes/admin-routes");
 const postRoutes = require("./routes/post-routes");
 
 require("dotenv").config();
-const isProduction = process.env.NODE_ENV === "production";
 
 const app = express();
 app.use(cookieParser());
@@ -18,14 +17,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
   cors({
-    origin: isProduction
-      ? "https://tu-dominio-produccion.com"
-      : "http://localhost:3000",
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
 
-const PORT = 8000;
+const PORT = 3001;
 
 app.use("/api/post", postRoutes);
 app.use("/api/auth/admin", authRouter);

@@ -2,11 +2,8 @@ const jwt = require("jsonwebtoken");
 const dbPosts = require("../models/postModels");
 const uploadImages = require("../utils/uploadImage");
 
-const jwt = require("jsonwebtoken");
-
 const loginAdmin = (req, res) => {
   const { email, password } = req.body;
-  const isProduction = process.env.NODE_ENV === "production";
 
   try {
     if (
@@ -21,9 +18,9 @@ const loginAdmin = (req, res) => {
 
       res.cookie("atoken", token, {
         httpOnly: true,
-        secure: isProduction,
+        secure: false,
         maxAge: 24 * 60 * 60 * 1000,
-        sameSite: isProduction ? "None" : "Lax",
+        sameSite: "lax",
       });
 
       const dataAdmin = {
